@@ -260,3 +260,11 @@ class Client:
     
     def send_new_team(self, n):
         self.send(f'env|team|change|{self.username}|{n}')
+
+    def get_version(self):
+        self.send('version')
+
+        # wait for response
+        response = self.receive_msg()
+
+        return response

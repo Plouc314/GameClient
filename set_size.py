@@ -1,3 +1,5 @@
+# set the size of the game window according to the screen resolution
+
 done = False
 
 while not done:
@@ -15,14 +17,8 @@ ratio_y = y/1600
 
 ratio =  min(ratio_x, ratio_y)*.9
 
-try:
-    
-    with open('interface.py') as file:
-        content = file.read()
-    content = content.replace('##RATIO##',str(ratio))
-    print(content)
-    
-    with open('interfarce.py', 'w') as file:
+try:    
+    with open('screen_factor.txt', 'w') as file:
         file.write(content)
 except:
-    print("Can't open interfarce.py file")
+    print("Can't open 'screen_factor.txt' file")
