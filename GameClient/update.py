@@ -10,7 +10,7 @@ Font.init(dim.f)
 
 inter = Interface()
 
-DIM_SCREEN = (E(800), E(600))
+DIM_SCREEN = (E(800), E(400))
 screen = pygame.display.set_mode(DIM_SCREEN)
 screen.fill(C.WHITE)
 pygame.display.set_caption('Update')
@@ -37,43 +37,6 @@ with open('version.txt') as file:
 
 delay = 0
 
-while inter.running:
-    pressed, events = inter.run()
-    if state == 'inconn':
-        text_conn.display()
-        try:
-            from client import Client
-            state = 'conn'
-            text_search.display()
-        except:
-            state = 'fail'
-    elif state == 'fail':
-        text_fail_conn.display()
-    elif state == 'conn':
-        text_update.display()
-        client = Client()
-        version = client.get_version()
-        if version == current_version:
-            state = 'ok'
-            delay = 0
-        else:
-            # need to update the game
-            text_update.display()
-            state = 'updating'
-    elif state == 'ok':
-        delay += 1
-        if delay == 15:
-            inter.running = False
-        text_finish.display()
-    elif state == 'updating':
-        text_update.display()
-        run_update()
-        # set new version
-        with open('version.txt','w') as file:
-            file.write(version)
-        
-
-
 def run_update():
     contents = {}
     contents['interface'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/interface.py')
@@ -94,5 +57,45 @@ def run_update():
     contents['game/weapons'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/game/weapons.py')
     
     for path, content in contents.items():
-        with open(path, 'w') as file:
-            file.write(content)
+        with open(path+'.py', 'w') as file:
+            file.write(content.text)
+
+while inter.running:
+    pressed, events = inter.run()
+    if state == 'inconn':
+        text_conn.display()
+        try:
+            from client import Client
+            state = 'conn'
+            text_search.display()
+        except:
+            state = 'fail'
+    elif state == 'fail':
+        text_fail_conn.display()
+    elif state == 'conn':
+        text_update.display()
+        client = Client()
+        version = client.get_version()
+        print('SERVER:',version, 'LOCAL:',current_version)
+        if version == current_version:
+            state = 'ok'
+            delay = 0
+        else:
+            # need to update the game
+            text_update.display()
+            state = 'updating'
+    elif state == 'ok':
+        delay += 1
+        if delay == 15:
+            inter.running = False
+        text_finish.display()
+    elif state == 'updating':
+        text_update.display()
+        run_update()
+        # set new version
+        with open('version.txt','w') as file:
+            file.write(version)
+        inter.running = False
+        
+
+

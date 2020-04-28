@@ -12,7 +12,8 @@ if [ $input == 'n' ]; then
     brew install python3
 fi
 
-echo "Insalling pygame..."
+echo "Insalling libraries..."
 pip3 install pygame
+pip3 install requests
 echo "Setting up window size..."
 python3 set_size.py
