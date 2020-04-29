@@ -27,8 +27,8 @@ elif os == "Darwin":
 
 try:
     with open("GameClient/parameters.txt","w") as file:
-	file.write(str(ratio)+"\n")
-	file.write(str(font_factor))
+        file.write(str(ratio)+"\n")
+        file.write(str(font_factor))
 except:
     print("Can't open GameClient/parameters.txt file")
 	
