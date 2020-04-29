@@ -18,7 +18,7 @@ ratio_y = y/1600
 ratio =  min(ratio_x, ratio_y)*.9
 
 try:    
-    with open('screen_factor.txt', 'w') as file:
-        file.write(content)
+    with open('GameClient/screen_factor.txt', 'w') as file:
+        file.write(str(ratio))
 except:
-    print("Can't open 'screen_factor.txt' file")
+    print("Can't open 'GameClient/screen_factor.txt' file")

@@ -4,19 +4,20 @@ To install the game (in fact the software needed to run the game) follow the fol
 MAC
 
 1) Open a terminal
-2) Go to the directory where the game's files are located ( typing 'cd Downloads' should work)
+2) Go to the directory where the game's files are located ( typing 'cd Downloads/GameClient-master/GameClient-master' should work)
 3) Type 'sudo chmod 755 install_mac.sh' and press enter (You will probably need to type your password)
 4) Type './install_mac.sh', it will install all the necessary things 
 5) Type 'sudo chmod 755 launch_mac.py' and press enter
 6) That's it!
-To launch the game, double-click on 'launch_mac.command'
+To launch the game, double-click on 'launch_mac.command' (it's in the GameClient folder)
 
 WINDOWS
 
 1) Open a command prompt (cmd) (invite de commande en français)
-2) Go to the directory where the game's files are located ( typing 'cd Downloads' should work)
+2) Go to the directory where the game's files are located ( typing 'cd Downloads\GameClient-master\GameClient-master' should work)
 3) Type 'install_windows.bat' and follow the instructions (you need to add python to PATH!)
 4) That's it!
-To launch the game, double-click on 'launch_mac.bat' (if it doesn't, open a cmd and type 'launch_mac.bat')
+To launch the game, double-click on 'launch_mac.bat' (it's in the GameClient folder)
+NOTE: you can create a shortcut on the desktop
 
-Once the installation is completed, you move the GameClient folder wherever you want and delete the other files (except the launch ones!!)
+Once the installation is completed, you can move the GameClient folder wherever you want and delete the other files 

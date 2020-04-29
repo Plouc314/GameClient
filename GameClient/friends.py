@@ -1,270 +1,251 @@
-import socket
-from time import sleep
-from helper import split_list
+from base import TextBox, InputText, Button, Cadre, C, Font, dim
+from helper import scale
+import pygame
 
-HEADER = 64
-PORT = 5050 #44778
-FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = '192.168.1.122'
-ADDR = (SERVER, PORT)
+DIM_DFR_B = scale((100,60), dim.f)
+DIM_TY = scale(60,dim.f)
+MARGE = scale(200,dim.f)
+LMARGE = int(MARGE/2)
 
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(ADDR)
+class FriendDemand:
+    def __init__(self, x_dim, pos, username):
+        self.pos = pos
+        self.username = username
+        text = f'Friend demand: {username}'
+        self.text = TextBox((x_dim-MARGE,DIM_TY),C.LIGHT_GREY,pos,text,font=Font.f30)
+        self.button_yes = Button(DIM_DFR_B,C.LIGHT_GREEN,(pos[0]+x_dim-MARGE,pos[1]),'Yes',font=Font.f30)
+        self.button_no = Button(DIM_DFR_B,C.LIGHT_RED,(pos[0]+x_dim-LMARGE,pos[1]),'No',font=Font.f30)
 
+    def display(self):
+        self.text.display()
+        self.button_yes.display()
+        self.button_no.display()
 
-class Client:
-    client = client
-    fr_states = {}
+class Invitation:
+    def __init__(self, x_dim, pos, username):
+        self.pos = pos
+        self.username = username
+        text = f'Invitation from: {username}'
+        self.text = TextBox((x_dim-MARGE,DIM_TY),C.LIGHT_GREY,pos,text,font=Font.f30)
+        self.button_yes = Button(DIM_DFR_B,C.LIGHT_GREEN,(pos[0]+x_dim-MARGE,pos[1]),'Yes',font=Font.f30)
+        self.button_no = Button(DIM_DFR_B,C.LIGHT_RED,(pos[0]+x_dim-LMARGE,pos[1]),'No',font=Font.f30)
+
+    def display(self):
+        self.text.display()
+        self.button_yes.display()
+        self.button_no.display()
+
+class Friend:
+    CTEXT = C.GREEN
+    CBUTTON = C.LIGHT_GREEN
+    def __init__(self, dim, pos, username, state):
+        self.pos = pos
+        self.username = username
+        self.in_game = False
+        self.state = state
+        self.text = TextBox((int(5/8*dim[0]),dim[1]),self.CTEXT, pos, username, font=Font.f30,marge=True)
+        self.button_invite = Button((int(1/4*dim[0]),dim[1]),self.CBUTTON,
+                            (pos[0]+int(5/8*dim[0]),pos[1]),'Invite',font=Font.f30)
+        self.text_ingame = TextBox((int(1/4*dim[0]),dim[1]), self.CBUTTON,
+                            (pos[0]+int(5/8*dim[0]),pos[1]),'In game', font=Font.f30)
+        self.button_delete = Button((int(1/8*dim[0]),dim[1]),C.LIGHT_GREY,
+                            (pos[0]+int(7/8*dim[0]),pos[1]),'Del',font=Font.f30)
+
+    def display(self):
+        if self.state == 'conn' or self.state == 'inenv':
+            self.text.set_color(C.GREEN, marge=True)
+            self.button_invite.set_color(C.LIGHT_GREEN, marge=True)
+        else:
+            self.text.set_color(C.RED, marge=True)
+            self.button_invite.set_color(C.LIGHT_RED, marge=True)
+        self.text.display()
+        self.button_delete.display()
+        if self.state == 'inenv':
+            self.text_ingame.display()
+        else:
+            self.button_invite.display()
+
+NORMAL = 0
+ADD_FR = 1
+FAIL = 2
+DIM_B = scale((120,60), dim.f)
+DIM_BADD = scale((200,60),dim.f)
+E = lambda x: int(x*dim.f) 
+DIM_LTB = scale((400,80), dim.f)
+DIM_STB = scale((300,80), dim.f)
+
+class Friends:
+    state = NORMAL
+    decal_y = 0
     fr_demands = []
-    friends = {}
-    ready_users = []
-    game_msgs = []
     invs = []
-    dead_players = []
-    team_changes = {}
-    new_env_players = []
-    left_env_players = []
-    team_created = False
-    is_dfr_valid = None
-    is_del_fr = False
-    in_env = False
-    env_users = None
-    in_game = False
-    in_game_session = False
-    def __init__(self):
-        self.logged = False
-        self.connected = True
-        self.state = 'logging'
-        self.chat_msgs = []
-    
-    def log(self, username, password):
-        
-        self.send(f'log|{username}|{password}')
-        
-        # wait for response
-        response = self.receive_msg()
-        print(f'[SERVER] {response}')
-        if response == 'logged':
-            self.logged = True
-            self.username = username
-            return True
-        else:
-            return False
-    
-    def sign_up(self, username, password):
+    def __init__(self, dim, pos, client):
+        self.dim = dim
+        self.pos = (pos[0],pos[1]+DIM_TY) # update pos to don't care about 'add friend' button
+        self.client = client
+        self.usernames = []
+        self.obj_friends = []
+        self.DIM_FR = (dim[0],DIM_TY)
+        self.cadre = Cadre((dim[0],dim[1]-DIM_TY), C.WHITE, (pos[0],pos[1]+DIM_TY))
+        # state normal
+        self.button_add = Button(DIM_BADD,C.LIGHT_BLUE,
+            (pos[0]+dim[0]-MARGE,pos[1]),'Add friend',font=Font.f30)
+        # state add fr
+        POS_TEXT = (self.pos[0]+E(20),self.pos[1]+2*E(20))
+        self.text_add = TextBox(DIM_LTB,C.WHITE, POS_TEXT,
+                    'Send demand to someone',font=Font.f30)
+        self.textin_add = TextBox(DIM_STB, C.WHITE, (POS_TEXT[0],POS_TEXT[1]+E(100)),
+                    'Enter username:',font=Font.f30)
+        self.input_add = InputText(DIM_LTB, (POS_TEXT[0]+E(300),POS_TEXT[1]+E(100)),C.WHITE)
+        self.button_done = Button(DIM_B, C.LIGHT_BLUE, 
+                    (self.pos[0]+self.dim[0]-E(140),self.pos[1]+self.dim[1]-E(140)),'Done',font=Font.f30)
+        self.button_cancel = Button(DIM_B, C.LIGHT_BLUE, 
+                    (self.pos[0]+E(20),self.pos[1]+self.dim[1]-E(140)),'Cancel',font=Font.f30)
+        # state fail
+        self.text_fail = TextBox(DIM_LTB,C.WHITE, POS_TEXT,
+                    'Invalid username',font=Font.f50, TEXT_COLOR=C.RED)
 
-        self.send(f'sign|{username}|{password}')
+    def add_friend(self, username, state):
+        i = len(self.obj_friends)
+        new_friend = Friend(self.DIM_FR,(self.pos[0],self.pos[1]+i*E(60)),username, state)
+        self.obj_friends.append(new_friend)
 
-        # wait for response
-        response = self.receive_msg()
-        if response == 'signed':
-            self.logged = True
-            self.username = username
-            return True
-        elif response == 'taken':
-            return False
-
-    def stop(self):
-        self.logged = False
-        self.connected = False
-        self.send(DISCONNECT_MESSAGE)
-        client.close()
-
-    def loop_msg(self):
-        while self.logged:
-            msg = self.receive_msg()
-            if msg:
-                if not self.in_game:
-                    print(f'[SERVER] {msg}')
-                msg = msg.split('|')
-                # check to know type of msg
-                # env msgs
-                if msg[0] == 'env':
-                    self.handeln_env(msg)
-                elif msg[0] == 'chat': # chat msg
-                    username = msg[1]
-                    content = msg[2]
-                    self.chat_msgs.append((username, content))
-                elif msg[0] == 'disconn':
-                    break
-                elif msg[0] == 'fr': # friend connected or disconnected
-                    if msg[1] == 'conn':
-                        self.friends[msg[2]] = 'conn'
-                    elif msg[1] == 'disconn':
-                        self.friends[msg[2]] = 'disconn'
-                    elif msg[1] == 'inenv':
-                        self.friends[msg[2]] = 'inenv'
-                elif msg[0] == 'outenv':
-                    self.friends[msg[1]] = 'conn'
-                    self.left_env_players.append(msg[1])
-                elif msg[0] == 'dfr': # friend demand
-                    self.fr_demands.append(msg[1])
-                elif msg[0] == 'delfr': # a friend delete self (you)
-                    self.friends.pop(msg[1])
-                    self.is_del_fr = True
-                elif msg[0] == 'dfrv': # valid or invalid username in friend demand
-                    if msg[1] == '1':
-                        self.is_dfr_valid = True
-                    else:
-                        self.is_dfr_valid = False
-                elif msg[0] == 'inv':
-                    self.invs.append(msg[1])
-                                    
-    def handeln_env(self, msg):
-        if not self.in_game:
-            if msg[1] == 'conn':
-                if not self.in_env:
-                    self.in_env = True
-                    self.env_users = msg[2:]
-                    self.n_env_users = len(self.env_users) + 1
-                else:
-                    # add a new player to the env
-                    self.new_env_players.append(msg[2])
-                    self.env_users.append(msg[2])
-                    self.n_env_users += 1
-
-            elif msg[1] == 'stop':
-                self.in_env, self.in_game, self.in_game_session = False, False, False
-            elif msg[1] == 'ready':
-                self.ready_users.append({'username':msg[2],'weapon':msg[3],'char':int(msg[4]),'team':int(msg[5])})
-            elif msg[1] == 'play':
-                self.team = int(msg[2])
-                self.in_game_session = True
-            elif msg[1] == 'team':
-                if msg[2] == 'change':
-                    username = msg[3]
-                    team_idx = int(msg[4])
-                    self.team_changes[username] = team_idx
-                elif msg[2] == 'create':
-                    self.team_created = True
-        else:
-            if msg[1] == 'dead':
-                self.dead_players.append(msg[2])
-            elif msg[1] == 'stop':
-                self.in_env, self.in_game, self.in_game_session = False, False, False
+    def check_connected(self):
+        # check for connected/disconnected friends
+        for username, state in self.client.friends.items():
+            if username in self.usernames:
+                index = self.usernames.index(username)
+                self.obj_friends[index].state = state
             else:
-                msg = msg[1:]
-                try:
-                    self.handeln_game_msg(msg)
-                except:
-                    print("[ERROR] Can't handeln game message")
-                    self.in_env, self.in_game, self.in_game_session = False, False, False
-
-    def handeln_game_msg(self, msg):
-        infos = split_list('u', msg)
-        for current_msg in infos:
-            if current_msg[0] != self.username:
-                # for each player get each transmitted info
-                d = {'username':current_msg[0]}
-                for info in current_msg[1:]:
-                    if info[0] == 'a':
-                        d['angle'] = float(info[1:])
-                    elif info[0] == 'f':
-                        d['fire'] = True
-                    elif info[0] == 'l':
-                        d['left'] = int(info[1])
-                    elif info[0] == 'r':
-                        d['right'] = int(info[1])
-                    elif info[0] == 'j':
-                        d['jump'] = True
-                self.game_msgs.append(d)
-
-    def send_chat_msg(self, msg):
-        self.send(f'chat|{msg}')
-    
-    def send(self,msg):
-        message = msg.encode(FORMAT)
-        msg_length = len(message)
-        send_length = str(msg_length).encode(FORMAT)
-        send_length += b' ' * (HEADER - len(send_length))
-        client.send(send_length)
-        client.send(message)
-
-    def receive_msg(self):
-        received = False
-        while not received and self.connected:        
-            msg_length = client.recv(HEADER).decode(FORMAT)
-            if msg_length:
-                received = True
-                msg_length = int(msg_length)
-                try:
-                    msg = client.recv(msg_length).decode(FORMAT)
-                    return msg
-                except:
-                    print('[ERROR] failure to receive the message: aborting...')
-    
-    def disconn(self):
-        self.logged = False
-        self.friends = {}
-        self.fr_demands = []
-        self.send('disconn')
-
-    def del_friend(self, username):
-        self.friends.pop(username)
-        self.send(f'delfr|{username}')
-
-    def get_invs(self):
-        invs = self.invs
-        self.invs = []
-        return invs
-
-    def get_del_friend(self):
-        is_del_fr = self.is_del_fr
-        self.is_del_fr = False
-        return is_del_fr
-
-    def get_demand_fr(self):
-        demands = self.fr_demands
-        self.fr_demands = []
-        return demands
-
-    def invite_friend(self, username):
-        self.send(f'inv|{username}')
-
-    def return_inv_fr(self, username):
-        self.send(f'rinv|{username}')
-
-    def demand_friend(self, username):
-        self.send(f'dfr|{username}')
-    
-    def return_friend_demand(self, username, accepted):
-        self.send(f'rdfr|{username}|{accepted}')
-
-    def env_play(self):
-        self.send(f'env|play')
-
-    def env_ready(self, weapon, char):
-        self.send(f'env|ready|{weapon}|{char}|{self.team}')
-    
-    def env_game(self, angle, fire, left, right, jump):
-        msg = 'env'
-        msg += f'|a{angle:.2f}'
-        msg += f'|l{left}'
-        msg += f'|r{right}'
-        if fire:
-            msg += '|f'
-        if jump:
-            msg += '|j'
+                self.usernames.append(username)
+                self.add_friend(username, state)
         
-        self.send(msg)
+        # get potential new friends demands
+        new_friend_demands = self.client.get_demand_fr()
+        for fr_d in new_friend_demands:
+            current_fr_d = FriendDemand(self.dim[0],
+                    (self.pos[0],self.decal_y*E(60)+self.pos[1]+self.dim[1]-E(60)),fr_d)
+            self.decal_y += 1
+            self.fr_demands.append(current_fr_d)
+        
+        # if a friend deleted you, reset friend
+        if self.client.get_del_friend():
+            self.obj_friends = []
+            self.usernames = []
+        
+        # get potential invitation from friends
+        for username in self.client.get_invs():
+            new_inv = Invitation(self.dim[0],
+                    (self.pos[0],self.decal_y*E(60)+self.pos[1]+self.dim[1]-E(60)),username)
+            self.decal_y += 1
+            self.invs.append(new_inv)
 
-    def game_dead_player(self, username):
-        self.send(f'env|dead|{username}')
 
-    def quit_game_or_env(self):
-        self.send(f'env|quit')
+    def react_events(self, events, pressed):
+        self.check_connected()
+        if self.state == NORMAL:
+            self.react_events_normal(events, pressed)
+        elif self.state == ADD_FR:
+            self.react_events_addfr(events, pressed)
+        elif self.state == FAIL:
+            self.react_events_fail(events, pressed)
+
+    def react_events_normal(self, events, pressed):
+        self.react_events_frd(events, pressed)
+        self.react_events_invs(events, pressed)
+        if self.button_add.pushed(events):
+            self.state = ADD_FR
+        for friend in self.obj_friends:
+            if friend.button_delete.pushed(events):
+                self.del_friend(friend)
+            if friend.button_invite.pushed(events):
+                if friend.state == 'conn':
+                    self.client.invite_friend(friend.username)
+
+    def react_events_addfr(self, events, pressed):
+        self.input_add.run(events, pressed)
+        if self.button_cancel.pushed(events):
+            self.state = NORMAL
+            self.input_add.text = ''
+        if self.button_done.pushed(events):
+            username = self.input_add.text
+            self.client.demand_friend(username)
+            
+        if self.client.is_dfr_valid != None: # receive a response
+            if self.client.is_dfr_valid:
+                self.state = NORMAL
+            else:
+                self.state = FAIL
+            self.client.is_dfr_valid = None
+
+    def react_events_frd(self, events, pressed):
+        for frd in self.fr_demands:
+            if frd.button_yes.pushed(events):
+                self.client.return_friend_demand(frd.username,True)
+                self.fr_demands.remove(frd)
+                self.decal_y -= 1
+            if frd.button_no.pushed(events):
+                self.client.return_friend_demand(frd.username,False)
+                self.fr_demands.remove(frd)
+                self.decal_y -= 1
+
+    def react_events_invs(self, events, pressed):
+        for inv in self.invs:
+            if inv.button_yes.pushed(events):
+                self.client.return_inv_fr(inv.username)
+                self.invs.remove(inv)
+                self.decal_y -= 1
+            if inv.button_no.pushed(events):
+                self.invs.remove(inv)
+                self.decal_y -= 1
     
-    def create_team(self):
-        self.send(f'env|team|create')
+    def react_events_fail(self, events, pressed):
+        if self.button_done.pushed(events):
+            self.state = NORMAL
+            self.input_add.text = ''
+
+    def del_friend(self, friend):
+        self.obj_friends = []
+        self.usernames = []
+        self.client.del_friend(friend.username)
+
+    def reset(self):
+        self.usernames = []
+        self.obj_friends = []
+        self.fr_demands = []
+
+    def display(self):
+        self.cadre.display()
+        if self.state == NORMAL:
+            self.display_normal()
+        elif self.state == ADD_FR:
+            self.display_addfr()
+        elif self.state == FAIL:
+            self.display_fail()
+
+    def display_normal(self):
+        self.button_add.display()
+        for friend in self.obj_friends:
+            friend.display()
+        
+        for frd in self.fr_demands:
+            frd.display()
+        
+        for inv in self.invs:
+            inv.display()
+        
+    def display_addfr(self):
+        self.text_add.display()
+        self.textin_add.display()
+        self.input_add.display()
+        self.button_done.display()
+        self.button_cancel.display()
     
-    def send_new_team(self, n):
-        self.send(f'env|team|change|{self.username}|{n}')
+    def display_fail(self):
+        self.button_done.display()
+        self.text_fail.display()
 
-    def get_version(self):
-        self.send('version')
-
-        # wait for response
-        response = self.receive_msg()
-
-        return response
+    def get_obj_friend(self, username):
+        for obj in self.obj_friends:
+            if obj.username == username:
+                return obj
