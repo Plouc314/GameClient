@@ -17,7 +17,7 @@ WINDOWS
 2) Go to the directory where the game's files are located ( typing 'cd Downloads\GameClient-master\GameClient-master' should work)
 3) Type 'install_windows.bat' and follow the instructions (you need to add python to PATH!)
 4) That's it!
-To launch the game, double-click on 'launch_mac.bat' (it's in the GameClient folder)
+To launch the game, double-click on 'launch_windows.bat' (it's in the GameClient folder)
 NOTE: you can create a shortcut on the desktop
 
 Once the installation is completed, you can move the GameClient folder wherever you want and delete the other files 
