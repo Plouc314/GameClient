@@ -15,10 +15,20 @@ while not done:
 ratio_x = x/3000
 ratio_y = y/1600
 
-ratio =  min(ratio_x, ratio_y)*.9
+ratio =  min(ratio_x, ratio_y)*.8
 
-try:    
-    with open('GameClient/screen_factor.txt', 'w') as file:
-        file.write(str(ratio))
+import platform
+
+os = platform.system()
+if os == "Windows":
+    font_factor = 1.3
+elif os == "Darwin":
+    font_factor = 1
+
+try:
+    with open("GameClient/parameters.txt","w") as file:
+	file.write(str(ratio)+"\n")
+	file.write(str(font_factor))
 except:
-    print("Can't open 'GameClient/screen_factor.txt' file")
+    print("Can't open GameClient/parameters.txt file")
+	
