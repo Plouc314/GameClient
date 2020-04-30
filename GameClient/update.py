@@ -39,22 +39,22 @@ delay = 0
 
 def run_update():
     contents = {}
-    contents['interface'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/interface.py')
-    contents['main'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/main.py')
-    contents['base'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/base.py')
-    contents['client'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/client.py')
-    contents['friends'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/client.py')
-    contents['chat'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/chat.py')
-    contents['helper'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/helper.py')
-    contents['menu'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/menu.py')
-    contents['teams'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/teams.py')
-    contents['game/game_menu'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/game/game_menu.py')
-    contents['game/main'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/game/main.py')
-    contents['game/helper'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/game/helper.py')
-    contents['game/platform'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/game/platform.py')
-    contents['game/player'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/game/player.py')
-    contents['game/score'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/game/score.py')
-    contents['game/weapons'] = requests.get('https://raw.githubusercontent.com/Plouc314/GameClient/master/GameClient/game/weapons.py')
+    contents['interface'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/interface.py')
+    contents['main'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/main.py')
+    contents['base'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/base.py')
+    contents['client'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/client.py')
+    contents['friends'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/client.py')
+    contents['chat'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/chat.py')
+    contents['helper'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/helper.py')
+    contents['menu'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/menu.py')
+    contents['teams'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/teams.py')
+    contents['game/game_menu'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/game/game_menu.py')
+    contents['game/main'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/game/main.py')
+    contents['game/helper'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/game/helper.py')
+    contents['game/platform'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/game/platform.py')
+    contents['game/player'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/game/player.py')
+    contents['game/score'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/game/score.py')
+    contents['game/weapons'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/game/weapons.py')
     
     for path, content in contents.items():
         with open(path+'.py', 'w') as file:
