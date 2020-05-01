@@ -20,8 +20,8 @@ WINDOWS
 To launch the game, double-click on 'SocketGame.bat' (it's in the GameClient folder)
 NOTE: you can create a shortcut on the desktop
 
-LINUX
+LINUX/PROGRAMMER(s)
 
-If you're using linux you should be able to install pygame and requests by yourself.
+Requirements are a python3 interpreter and the libraries: pygame and requests.
 
 Once the installation is completed, you can move the GameClient folder wherever you want and delete the other files 

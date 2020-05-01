@@ -43,7 +43,7 @@ def run_update():
     contents['main'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/main.py')
     contents['base'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/base.py')
     contents['client'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/client.py')
-    contents['friends'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/client.py')
+    contents['friends'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/friends.py')
     contents['chat'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/chat.py')
     contents['helper'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/helper.py')
     contents['menu'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/menu.py')
@@ -60,24 +60,22 @@ def run_update():
         with open(path+'.py', 'w') as file:
             file.write(content.text)
 
+inter.run()
+text_conn.display()
 while inter.running:
     pressed, events = inter.run()
     if state == 'inconn':
         text_conn.display()
         try:
-            from client import Client
+            server_version = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/version.txt').text
             state = 'conn'
-            text_search.display()
         except:
             state = 'fail'
     elif state == 'fail':
         text_fail_conn.display()
     elif state == 'conn':
         text_update.display()
-        client = Client()
-        version = client.get_version()
-        print('SERVER:',version, 'LOCAL:',current_version)
-        if version == current_version:
+        if server_version == current_version:
             state = 'ok'
             delay = 0
         else:
@@ -94,7 +92,7 @@ while inter.running:
         run_update()
         # set new version
         with open('version.txt','w') as file:
-            file.write(version)
+            file.write(server_version)
         inter.running = False
         
 
