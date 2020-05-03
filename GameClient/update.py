@@ -37,28 +37,37 @@ with open('version.txt') as file:
 
 delay = 0
 
-def run_update():
+def get_imgs_index(infos):
+    for i, info in enumerate(infos):
+        if info == 'imgs':
+            return i
+
+def get_infos():
+    infos = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/info.txt').text
+    infos = infos.split('\n')
+    server_version = infos[0]
+    img_index = get_imgs_index(infos)
+    file_names = infos[1:img_index]
+    img_names = infos[img_index+1:]
+    return server_version, file_names, img_names
+
+def run_update(file_names, img_names):
+    # update python files
     contents = {}
-    contents['interface'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/interface.py')
-    contents['main'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/main.py')
-    contents['base'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/base.py')
-    contents['client'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/client.py')
-    contents['friends'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/friends.py')
-    contents['chat'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/chat.py')
-    contents['helper'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/helper.py')
-    contents['menu'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/menu.py')
-    contents['teams'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/teams.py')
-    contents['game/game_menu'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/game/game_menu.py')
-    contents['game/main'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/game/main.py')
-    contents['game/helper'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/game/helper.py')
-    contents['game/platform'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/game/platform.py')
-    contents['game/player'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/game/player.py')
-    contents['game/score'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/game/score.py')
-    contents['game/weapons'] = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/game/weapons.py')
-    
+    for fname in file_names:
+        text = requests.get(f'https://raw.githubusercontent.com/Plouc314/SocketGame/master/{fname}.py').text
+        contents[fname] = text
+
     for path, content in contents.items():
         with open(path+'.py', 'w') as file:
-            file.write(content.text)
+            file.write(content)
+    
+    # update imgs
+    for img_path in img_names:
+        response = requests.get(f'https://raw.githubusercontent.com/Plouc314/SocketGame/master/{img_path}')
+        if response.status_code == 200:
+            with open(img_path, 'wb') as f:
+                f.write(response.content)
 
 inter.run()
 text_conn.display()
@@ -67,7 +76,7 @@ while inter.running:
     if state == 'inconn':
         text_conn.display()
         try:
-            server_version = requests.get('https://raw.githubusercontent.com/Plouc314/SocketGame/master/version.txt').text
+            server_version, file_names, img_names = get_infos()
             state = 'conn'
         except:
             state = 'fail'
@@ -89,7 +98,7 @@ while inter.running:
         text_finish.display()
     elif state == 'updating':
         text_update.display()
-        run_update()
+        run_update(file_names, img_names)
         # set new version
         with open('version.txt','w') as file:
             file.write(server_version)
