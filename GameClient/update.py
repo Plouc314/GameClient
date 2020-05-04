@@ -55,6 +55,7 @@ def run_update(file_names, img_names):
     # update python files
     contents = {}
     for fname in file_names:
+        fname = fname.strip()
         text = requests.get(f'https://raw.githubusercontent.com/Plouc314/SocketGame/master/{fname}.py').text
         contents[fname] = text
 
