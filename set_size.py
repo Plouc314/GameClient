@@ -15,7 +15,7 @@ while not done:
 ratio_x = x/3000
 ratio_y = y/1600
 
-ratio =  min(ratio_x, ratio_y)*.8
+ratio =  min(ratio_x, ratio_y)*.7
 
 import platform
 
