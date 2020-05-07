@@ -6,7 +6,6 @@ pygame.init()
 
 E = lambda x: int(x*Dimension.f) 
 dim = Dimension((E(3000),E(1600)))
-Font.init(dim.f)
 
 inter = Interface()
 

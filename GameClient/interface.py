@@ -56,16 +56,18 @@ class C:
 
 #set font
 if font_factor == 1.3:
+    # windows font
     fontname = "Ubuntu"
 else:
+    # mac and linux font
     fontname = "Arial"
 
 class Font:
-    f25 = pygame.font.SysFont( fontname, E(25))
-    f30 = pygame.font.SysFont( fontname, E(30))
-    f50 = pygame.font.SysFont( fontname, E(50))
-    f70 = pygame.font.SysFont( fontname, E(70))
-    f100 = pygame.font.SysFont(fontname, E(100))
+    f25 = pygame.font.SysFont( fontname, E(25* dim_factor*font_factor))
+    f30 = pygame.font.SysFont( fontname, E(30* dim_factor*font_factor))
+    f50 = pygame.font.SysFont( fontname, E(50* dim_factor*font_factor))
+    f70 = pygame.font.SysFont( fontname, E(70* dim_factor*font_factor))
+    f100 = pygame.font.SysFont(fontname, E(100*dim_factor*font_factor))
     @classmethod
     def init(cls, factor):
         cls.f25 = pygame.font.SysFont( fontname, int(25* dim_factor*font_factor))
@@ -443,4 +445,3 @@ def get_pressed_key(pressed):
         return '0'
     elif pressed[pygame.K_SPACE]:
         return ' '
-
